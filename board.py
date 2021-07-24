@@ -13,7 +13,8 @@ class Piece:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.image = IMAGES[(x + y) % 2]
+        self.image = IMAGES[y >= 3]
+
 
     def draw(self):
         WIN.blit(self.image, (self.x * CLENGTH, self.y * CLENGTH))
@@ -39,8 +40,37 @@ class Cell:
 
 class Board:
     def __init__(self):
-        self.cells = [[Cell(i, j) for j in range(8)] for i in range(8)]
-        print(self.cells)
+        self.cells = []
+        # Add top 3 rows
+        for row in range(3):
+            temp = []
+            for col in range(8):
+                temp.append(Cell(col, row))
+                if (row + col) % 2:
+                    temp[-1].piece = Piece(col, row)
+            self.cells.append(temp)
+
+        # Add next 2 empty rows
+        for row in range(3, 5):
+            temp = []
+            for col in range(8):
+                temp.append(Cell(col, row))
+            self.cells.append((temp))
+
+        for row in range(5, 8):
+            temp = []
+            for col in range(8):
+                temp.append(Cell(col, row))
+                if (row + col) % 2:
+                    temp[-1].piece = Piece(col, row)
+            self.cells.append(temp)
+
+        # Add bottom 3 rows
+
+
+
+
+
 
     def draw(self):
         for row in self.cells:
