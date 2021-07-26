@@ -32,12 +32,16 @@ class Cell:
         self.y = y
         self.color = [LCOLOR, RCOLOR][(x + y) % 2]
         self.piece = piece
+        self.selected = False
 
     def __repr__(self):
         return f"({self.x},{self.y})"
 
     def draw(self):
-        pygame.draw.rect(WIN, self.color, [self.x * CLENGTH, self.y * CLENGTH, CLENGTH, CLENGTH])
+        color = self.color
+        if self.selected:
+            color = SCOLOR
+        pygame.draw.rect(WIN, color, [self.x * CLENGTH, self.y * CLENGTH, CLENGTH, CLENGTH])
         if self.piece is not None:
             self.piece.draw()
 
@@ -86,6 +90,7 @@ class Board:
             if clicked_cell.piece is not None:
                 if (clicked_cell.piece.color.value + self.turn) % 2 == 0:
                     self.source_cell = clicked_cell
+                    self.source_cell.selected = True
         else:
             # there is a source cell
             # Check if the clicked cell is valid position
@@ -97,8 +102,8 @@ class Board:
                     self.source_cell.piece.y = yc
                     clicked_cell.piece = self.source_cell.piece
                     self.source_cell.piece = None
+                    self.reset_source_cell()
 
-                    self.source_cell = None
                     self.turn = int(not self.turn)
                     print(self.turn)
                 else:
@@ -107,6 +112,7 @@ class Board:
                 self.reset_source_cell()
 
     def reset_source_cell(self):
+        self.source_cell.selected = False
         self.source_cell = None
 
 
