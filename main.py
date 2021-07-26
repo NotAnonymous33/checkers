@@ -19,11 +19,15 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        if event.type == pygame.MOUSEBUTTONUP:
+            pos = pygame.mouse.get_pos()
+            board.click(pos[0], pos[1])
+
     board.draw()
     pygame.display.flip()
     clock.tick(FPS)
 
-
+pygame.quit()
 
 
 

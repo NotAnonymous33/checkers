@@ -7,7 +7,8 @@ RCOLOR = (199, 117, 61)
 SCOLOR = (0, 255, 255)
 HCOLOR = (0, 181, 98)  # (127, 255, 0)
 TLENGTH = 600
-CLENGTH = TLENGTH // 8
+NUM_ROWS = 8
+CLENGTH = TLENGTH // NUM_ROWS
 FPS = 60
 WIN = pygame.display.set_mode((TLENGTH, TLENGTH + 50))
 
