@@ -68,15 +68,36 @@ class Board:
                         self.reset_source()
                 else:
                     self.reset_source()
-            else:  # if a cell with a piece is clicked
+            else:
                 if self.source_coord == (xc, yc):  # if the clicked piece is the same as the source piece
                     self.reset_source()  # reset
                 else:
                     # add checking if piece move is valid
-                    self.pieces[yc][xc] = self.pieces[self.source_coord[1]][self.source_coord[0]]  # move source piece to the new piece
-                    self.pieces[self.source_coord[1]][self.source_coord[0]] = 0  # set the source piece to 0
-                    self.reset_source()  # unselect the source piece
-                    self.turn = int(not self.turn)  # change the turn
+                    if self.turn:
+                        # if it is whites turn
+                        if yc == self.source_coord[1] - 1:
+                            if abs(xc - self.source_coord[0]) == 1:
+                                self.move_piece((xc, yc))
+                            else:
+                                self.reset_source()
+                        else:
+                            self.reset_source()
+                    else:
+                        # if it is blacks turn
+                        if yc == self.source_coord[1] + 1:
+                            if abs(xc - self.source_coord[0]) == 1:
+                                self.move_piece((xc, yc))
+                            else:
+                                self.reset_source()
+                        else:
+                            self.reset_source()
+
+    def move_piece(self, target):
+        self.pieces[target[1]][target[0]] = self.pieces[self.source_coord[1]][self.source_coord[0]]  # move source piece to the new piece
+        self.pieces[self.source_coord[1]][self.source_coord[0]] = 0  # set the source piece to 0
+        self.turn = int(not self.turn)  # unselect the source piece
+        self.reset_source()  # change the turn
+        pass
 
     def draw(self):
 
