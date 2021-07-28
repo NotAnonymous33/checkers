@@ -4,136 +4,96 @@ import pygame
 
 pygame.init()
 
+
 class PieceColor(Enum):
     WHITE = 1
     BLACK = 0
 
 
 class Piece:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    def __init__(self, y):
         self.color = None
-        if y >= 3:
-            self.color = PieceColor.WHITE
-        else:
+        if y < 3:
             self.color = PieceColor.BLACK
+        else:
+            self.color = PieceColor.WHITE
         self.image = IMAGES[self.color.value]
 
+    def __repr__(self):
+        return f"{self.color}"
 
-
-    def draw(self):
-        WIN.blit(self.image, (self.x * CLENGTH, self.y * CLENGTH))
+    def draw(self, x, y):
+        WIN.blit(self.image, (x * CLENGTH, y * CLENGTH))
 
 
 class Cell:
-    def __init__(self, x, y, piece=None):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
         self.color = [LCOLOR, RCOLOR][(x + y) % 2]
-        self.piece = piece
-        self.selected = False
-
-    def __repr__(self):
-        return f"({self.x},{self.y})"
 
     def draw(self):
-        color = self.color
-        if self.selected:
-            color = SCOLOR
-        pygame.draw.rect(WIN, color, [self.x * CLENGTH, self.y * CLENGTH, CLENGTH, CLENGTH])
-        if self.piece is not None:
-            self.piece.draw()
-
-
+        pygame.draw.rect(WIN, self.color, [self.x * CLENGTH, self.y * CLENGTH, CLENGTH, CLENGTH])
 
 
 class Board:
     def __init__(self):
-        self.cells = []
-        self.source_cell = None
-        self.target_cell = None
+        self.cells = [[Cell(col, row) for col in range(8)] for row in range(8)]
+        self.pieces = [
+            [Piece(0) if i % 2 else 0 for i in range(8)],
+            [Piece(1) if i % 2 == 0 else 0 for i in range(8)],
+            [Piece(2) if i % 2 else 0 for i in range(8)],
+            [0 for _ in range(8)],
+            [0 for _ in range(8)],
+            [Piece(5) if i % 2 == 0 else 0 for i in range(8)],
+            [Piece(6) if i % 2 else 0 for i in range(8)],
+            [Piece(7) if i % 2 == 0 else 0 for i in range(8)],
+        ]
+
+        self.source_piece = None
+        self.source_coord = (-1, -1)
         self.turn = 1
-        # Add top 3 rows
-        for row in range(3):
-            temp = []
-            for col in range(8):
-                temp.append(Cell(col, row))
-                if (row + col) % 2:
-                    temp[-1].piece = Piece(col, row)
-            self.cells.append(temp)
-
-        # Add next 2 empty rows
-        for row in range(3, 5):
-            temp = []
-            for col in range(8):
-                temp.append(Cell(col, row))
-            self.cells.append(temp)
-
-        # Add bottom 3 rows
-        for row in range(5, 8):
-            temp = []
-            for col in range(8):
-                temp.append(Cell(col, row))
-                if (row + col) % 2:
-                    temp[-1].piece = Piece(col, row)
-            self.cells.append(temp)
 
     def click(self, xpos, ypos):
         xc = xpos // CLENGTH
         yc = ypos // CLENGTH
-        if not (0 <= xc < NUM_ROWS) or not (0 <= yc < NUM_ROWS):
-            self.reset_source_cell()
-            return
-        clicked_cell = self.cells[yc][xc]
-        if self.source_cell is None:
-            if clicked_cell.piece is not None:
-                if (clicked_cell.piece.color.value + self.turn) % 2 == 0:
-                    self.source_cell = clicked_cell
-                    self.source_cell.selected = True
+        if not (0 <= xc <= 7 and 0 <= yc <= 7):  # de morgans law moment
+            self.reset_source()
         else:
-            # there is a source cell
-            # Check if the clicked cell is valid position
-            # if valid position, move cell, set turn to opposite, clear source and target cell
-            if abs(clicked_cell.x - self.source_cell.x) == 1:
-                if (clicked_cell.y - self.source_cell.y == -1 and self.turn) or (clicked_cell.y - self.source_cell.y == 1 and not self.turn):
-                    # move piece
-                    self.source_cell.piece.x = xc
-                    self.source_cell.piece.y = yc
-                    clicked_cell.piece = self.source_cell.piece
-                    self.source_cell.piece = None
-                    self.reset_source_cell()
-
-                    self.turn = int(not self.turn)
-                    print(self.turn)
-                else:
-                    self.reset_source_cell()
-            else:
-                self.reset_source_cell()
-
-    def reset_source_cell(self):
-        self.source_cell.selected = False
-        self.source_cell = None
-
-
-
-
-    def evaluate(self) -> int:
-        ev = 0
-        for row in self.cells:
-            for cell in row:
-                if cell.piece is not None:
-                    if cell.piece.value == 1:
-                        ev += 1
+            if self.source_coord == (-1, -1):  # if there isn't a source cell
+                if self.pieces[yc][xc] != 0:  # if a cell with a piece is clicked
+                    if self.turn == self.pieces[yc][xc].color.value:  # if the turn matches the color of the piece
+                        self.source_coord = (xc, yc)  # set the clicked piece as the source piece
                     else:
-                        ev -= 1
-        return ev
-
-
-
+                        self.reset_source()
+                else:
+                    self.reset_source()
+            else:  # if a cell with a piece is clicked
+                if self.source_coord == (xc, yc):  # if the clicked piece is the same as the source piece
+                    self.reset_source()  # reset
+                else:
+                    # add checking if piece move is valid
+                    self.pieces[yc][xc] = self.pieces[self.source_coord[1]][self.source_coord[0]]  # move source piece to the new piece
+                    self.pieces[self.source_coord[1]][self.source_coord[0]] = 0  # set the source piece to 0
+                    self.reset_source()  # unselect the source piece
+                    self.turn = int(not self.turn)  # change the turn
 
     def draw(self):
+
+        # draw the coloured squares of the board
         for row in self.cells:
             for cell in row:
                 cell.draw()
 
+        # draw highlighted squares
+
+        # draw pieces
+        for row_num in range(NUM_ROWS):
+            for col_num in range(NUM_ROWS):
+                if self.pieces[row_num][col_num] != 0:
+                    if self.source_coord == (col_num, row_num):
+                        pygame.draw.rect(WIN, SCOLOR, [col_num * CLENGTH, row_num * CLENGTH, CLENGTH, CLENGTH])
+                    self.pieces[row_num][col_num].draw(col_num, row_num)
+
+    def reset_source(self):
+        self.source_coord = (-1, -1)
