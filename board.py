@@ -82,7 +82,7 @@ class Board:
     def click(self, xpos, ypos):
         xc = xpos // CLENGTH
         yc = ypos // CLENGTH
-        if not (0 < xc < NUM_ROWS) or not (0 < yc < NUM_ROWS):
+        if not (0 <= xc < NUM_ROWS) or not (0 <= yc < NUM_ROWS):
             self.reset_source_cell()
             return
         clicked_cell = self.cells[yc][xc]
@@ -118,7 +118,7 @@ class Board:
 
 
 
-    def evalutate(self) -> int:
+    def evaluate(self) -> int:
         ev = 0
         for row in self.cells:
             for cell in row:
@@ -136,3 +136,4 @@ class Board:
         for row in self.cells:
             for cell in row:
                 cell.draw()
+
