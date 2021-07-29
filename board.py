@@ -53,6 +53,7 @@ class Board:
         self.source_piece = None
         self.source_coord = (-1, -1)
         self.turn = 1
+        self.highlighted_cells = []
 
     def click(self, xpos, ypos):
         xc = xpos // CLENGTH
@@ -64,6 +65,7 @@ class Board:
                 if self.pieces[yc][xc] != 0:  # if a cell with a piece is clicked
                     if self.turn == self.pieces[yc][xc].color.value:  # if the turn matches the color of the piece
                         self.source_coord = (xc, yc)  # set the clicked piece as the source piece
+                        self.highlight_cells(xc, yc)
                     else:
                         self.reset_source()
                 else:
@@ -73,11 +75,13 @@ class Board:
                     self.reset_source()  # reset
                 else:
                     # add checking if piece move is valid
+                    # if (xc, yc) in self.highlighted_cells:
+                    #       self.move_piece(xc, yc)
                     if self.turn:
                         # if it is whites turn
                         if yc == self.source_coord[1] - 1:
                             if abs(xc - self.source_coord[0]) == 1:
-                                self.move_piece((xc, yc))
+                                self.move_piece(xc, yc)
                             else:
                                 self.reset_source()
                         else:
@@ -86,14 +90,14 @@ class Board:
                         # if it is blacks turn
                         if yc == self.source_coord[1] + 1:
                             if abs(xc - self.source_coord[0]) == 1:
-                                self.move_piece((xc, yc))
+                                self.move_piece(xc, yc)
                             else:
                                 self.reset_source()
                         else:
                             self.reset_source()
 
-    def move_piece(self, target):
-        self.pieces[target[1]][target[0]] = self.pieces[self.source_coord[1]][self.source_coord[0]]  # move source piece to the new piece
+    def move_piece(self, x, y):
+        self.pieces[y][x] = self.pieces[self.source_coord[1]][self.source_coord[0]]  # move source piece to the new piece
         self.pieces[self.source_coord[1]][self.source_coord[0]] = 0  # set the source piece to 0
         self.turn = int(not self.turn)  # unselect the source piece
         self.reset_source()  # change the turn
@@ -107,6 +111,8 @@ class Board:
                 cell.draw()
 
         # draw highlighted squares
+        for coord in self.highlighted_cells:
+            pygame.draw.rect(WIN, HCOLOR, [coord[0] * CLENGTH, coord[1] * CLENGTH, CLENGTH, CLENGTH])
 
         # draw pieces
         for row_num in range(NUM_ROWS):
@@ -118,3 +124,16 @@ class Board:
 
     def reset_source(self):
         self.source_coord = (-1, -1)
+        self.highlighted_cells = []
+
+    def highlight_cells(self, x, y):
+        direction = 0
+        if self.turn:
+            direction = -1
+        else:
+            direction = 1
+        self.highlighted_cells.append((x-1, y+direction))
+        self.highlighted_cells.append((x+1, y+direction))
+
+
+
