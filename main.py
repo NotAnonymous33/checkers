@@ -23,11 +23,9 @@ while running:
             pos = pygame.mouse.get_pos()
             board.click(pos[0], pos[1])
 
-        pos = pygame.mouse.get_pos()
-        for button in board.buttons:
-            button.check_hover(pos[0], pos[1])
+    pos = pygame.mouse.get_pos()
 
-    board.draw()
+    board.draw(pos[0], pos[1])
     pygame.display.flip()
     clock.tick(FPS)
 

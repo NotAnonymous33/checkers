@@ -40,6 +40,7 @@ class Piece:
 
     def draw(self, x, y):
         WIN.blit(self.image, (x * CLENGTH, y * CLENGTH))
+        # pygame.draw.circle(WIN, [(255, 255, 255), (0, 0, 0)][self.color.value], (x, y), 20)
 
 
 class King(Piece):
@@ -113,9 +114,9 @@ class Board:
                         self.pieces[(yc + self.source_coord[1]) // 2][(xc + self.source_coord[0]) // 2] = Blank()
                     self.move_piece(xc, yc)
 
-
     def move_piece(self, x, y):
         if y == 7 and self.turn == 0 or y == 0 and self.turn == 1:
+            self.buttons.append(Button(0, TLENGTH))
             self.pieces[y][x] = King(7 - y)
         else:
             self.pieces[y][x] = self.pieces[self.source_coord[1]][
@@ -124,7 +125,7 @@ class Board:
         self.turn = int(not self.turn)  # unselect the source piece
         self.reset_source()  # change the turn
 
-    def draw(self):
+    def draw(self, mousex, mousey):
 
         # draw the coloured squares of the board
         for row in self.cells:
@@ -143,6 +144,7 @@ class Board:
                 self.pieces[row_num][col_num].draw(col_num, row_num)
 
         for button in self.buttons:
+            button.check_hover(mousex, mousey)
             button.draw()
 
     def reset_source(self):
@@ -194,5 +196,11 @@ class Board:
                     white += 1
         return not all([white, black])
 
-
-
+    def evaluate(self):
+        count = 0
+        for row in self.pieces:
+            for piece in row:
+                count += piece.color.value
+                if isinstance(piece, King):
+                    count += piece.color.value
+        return count
