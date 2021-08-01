@@ -36,22 +36,36 @@ class AI:
             for col in range(NUM_ROWS):
 
                 if board.pieces[row][col].color.value == 0:
+                    board.reset_source()
                     board.source_coord = (col, row)
                     board.highlight_cells(col, row)
+                    # print()
+                    # print(board.source_coord)
+                    # print(board.highlighted_cells)
                     for move in board.highlighted_cells:
                         temp_board = copy(board)
                         temp_board.pieces = [row[:] for row in board.pieces]
                         temp_board.move_piece(*move)  # may need to be *move
-                        evaluation = temp_board.evaluate()
+                        evaluation = 0
+
+                        if abs(move[0] - board.source_coord[0]) == 2:
+                            # print("diff of 2")
+                            temp_board.pieces[(move[1] + col) // 2][(move[0] + row) // 2] = Blank()
+                            evaluation -= 1
+                        evaluation += temp_board.evaluate()
                         # [print(temp_board.pieces[i]) for i in range(len(temp_board.pieces))]
+                        # print(evaluation, lowest_eval)
                         if evaluation < lowest_eval:
+                            # print("eval lower")
                             lowest_eval = evaluation
                             best_source_coord = (col, row)
                             best_dest_coord = move
+                    # print(lowest_eval)
 
         board.source_coord = best_source_coord
-        print(best_source_coord)
-        print(best_dest_coord)
+        # print(best_source_coord)
+        # print(best_dest_coord)
+        # print("----------------------------------------------------------")
         board.move_piece(*best_dest_coord)
         if abs(best_source_coord[0] - best_dest_coord[0]) == 2:
             board.pieces[(best_dest_coord[1] + best_source_coord[1]) // 2][(best_dest_coord[0] + best_source_coord[0]) // 2] = Blank()

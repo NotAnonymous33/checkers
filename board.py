@@ -3,6 +3,7 @@ import pygame
 from button import Button
 from ai import AI
 from blank import PieceColor, Blank
+import time
 
 pygame.init()
 
