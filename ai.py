@@ -1,6 +1,7 @@
 from copy import copy, deepcopy
 from constants import *
 from blank import Blank
+import time
 
 class AI:
     def __init__(self, depth=0):
@@ -66,6 +67,7 @@ class AI:
         # print(best_source_coord)
         # print(best_dest_coord)
         # print("----------------------------------------------------------")
+        time.sleep(1)
         board.move_piece(*best_dest_coord)
         if abs(best_source_coord[0] - best_dest_coord[0]) == 2:
             board.pieces[(best_dest_coord[1] + best_source_coord[1]) // 2][(best_dest_coord[0] + best_source_coord[0]) // 2] = Blank()
