@@ -1,3 +1,3 @@
 # checkers
-Dependancies:
+Dependencies:  
 pygame
