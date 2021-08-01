@@ -1,29 +1,14 @@
 from constants import *
-from enum import Enum
 import pygame
 from button import Button
+from ai import AI
+from blank import PieceColor, Blank
 
 pygame.init()
 
 
-class PieceColor(Enum):
-    WHITE = 1
-    BLACK = 0
-    BLANK = -1
 
 
-class Blank:
-    def __init__(self):
-        self.color = PieceColor.BLANK
-
-    def draw(self):
-        pass
-
-    def __repr__(self):
-        return "blank"
-
-    def draw(self, *args, **kwargs):
-        pass
 
 
 class Piece:
@@ -81,11 +66,11 @@ class Board:
             [Piece(7) if i % 2 == 0 else Blank() for i in range(8)],
         ]
 
-        self.source_piece = None
         self.source_coord = (-1, -1)
         self.turn = 1
         self.highlighted_cells = []
         self.buttons = []
+        self.ai = AI()
 
     def click(self, xpos, ypos):
         xc = xpos // CLENGTH
@@ -113,6 +98,7 @@ class Board:
                     if abs(yc - self.source_coord[1]) == 2:  # if the piece moves 2 (jumps)
                         self.pieces[(yc + self.source_coord[1]) // 2][(xc + self.source_coord[0]) // 2] = Blank()
                     self.move_piece(xc, yc)
+                    self.ai.move(self)
 
     def move_piece(self, x, y):
         if y == 7 and self.turn == 0 or y == 0 and self.turn == 1:
@@ -200,7 +186,8 @@ class Board:
         count = 0
         for row in self.pieces:
             for piece in row:
-                count += piece.color.value
-                if isinstance(piece, King):
-                    count += piece.color.value
+                if piece.color.value == 0:
+                    count -= 1
+                elif piece.color.value == 1:
+                    count += 1
         return count
