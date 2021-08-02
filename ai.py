@@ -1,11 +1,12 @@
-from copy import copy, deepcopy
+from copy import copy
 from constants import *
 from blank import Blank
-import time
+import functools
+
 
 class AI:
-    def __init__(self, depth=0):
-        self.depth = depth
+    def __init__(self, depth=1):
+        self.depth = depth - 1
 
     def move(self, board):
         # find the best move and move it
@@ -40,41 +41,93 @@ class AI:
                     board.reset_source()
                     board.source_coord = (col, row)
                     board.highlight_cells(col, row)
-                    # print()
-                    # print(board.source_coord)
-                    # print(board.highlighted_cells)
+
                     for move in board.highlighted_cells:
                         temp_board = copy(board)
                         temp_board.pieces = [row[:] for row in board.pieces]
-                        temp_board.move_piece(*move)  # may need to be *move
-                        evaluation = 0
+                        temp_board.move_piece(*move)
 
                         if abs(move[0] - board.source_coord[0]) == 2:
-                            # print("diff of 2")
-                            temp_board.pieces[(move[1] + col) // 2][(move[0] + row) // 2] = Blank()
-                            evaluation -= 1
-                        evaluation += temp_board.evaluate()
-                        # [print(temp_board.pieces[i]) for i in range(len(temp_board.pieces))]
-                        # print(evaluation, lowest_eval)
+                            temp_board.pieces[(move[1] + row) // 2][(move[0] + col) // 2] = Blank()
+                        if self.depth == 0:
+                            evaluation = temp_board.evaluate()
+                        else:
+                            evaluation = self.minimax(temp_board, self.depth, True)
+
                         if evaluation < lowest_eval:
-                            # print("eval lower")
+
                             lowest_eval = evaluation
                             best_source_coord = (col, row)
                             best_dest_coord = move
-                    # print(lowest_eval)
 
         board.source_coord = best_source_coord
-        # print(best_source_coord)
-        # print(best_dest_coord)
-        # print("----------------------------------------------------------")
-        time.sleep(1)
+
         board.move_piece(*best_dest_coord)
         if abs(best_source_coord[0] - best_dest_coord[0]) == 2:
             board.pieces[(best_dest_coord[1] + best_source_coord[1]) // 2][(best_dest_coord[0] + best_source_coord[0]) // 2] = Blank()
 
+    @functools.lru_cache(maxsize=None)
+    def minimax(self, board, depth, white) -> int:
+        '''
+        white value = 1
+        black value = 0
+        create a list, return a value
+        if depth == 1:
+            for every piece make every move
+            create list of eval
+            if white return highest
+            otherwise return lowest
+        else:
+            x = []
+            for each piece make every move
+            x.append(minimax(board, depth - 1, not white))
+            if white return highest
+            else return lowest
+
+        '''
+        val = 1 if white else 0
+        if depth == 1:
+            evals = []
+            for rowy in range(NUM_ROWS):
+                for colx in range(NUM_ROWS):
+                    if board.pieces[rowy][colx].color.value == val:
+                        board.reset_source()
+                        board.source_coord = (colx, rowy)
+                        board.highlight_cells(colx, rowy)
+
+                        for move in board.highlighted_cells:
+                            temp_board = copy(board)
+                            temp_board.pieces = [row[:] for row in board.pieces]
+                            temp_board.move_piece(*move)
+
+                            if abs(move[0] - board.source_coord[0]) == 2:
+                                temp_board.pieces[(move[1] + rowy) // 2][(move[0] + colx) // 2] = Blank()
+                            evals.append(temp_board.evaluate())
+            if white:
+                return max(evals)
+            return min(evals)
+
+        # depth is not 1
+        evals = []
+        for rowy in range(NUM_ROWS):
+            for colx in range(NUM_ROWS):
+                if board.pieces[rowy][colx].color.value == val:
+                    board.reset_source()
+                    board.source_coord = (colx, rowy)
+                    board.highlight_cells(colx, rowy)
+
+                    for move in board.highlighted_cells:
+                        temp_board = copy(board)
+                        temp_board.pieces = [row[:] for row in board.pieces]
+                        temp_board.move_piece(*move)
+
+                        if abs(move[0] - board.source_coord[0]) == 2:
+                            temp_board.pieces[(move[1] + rowy) // 2][(move[0] + colx) // 2] = Blank()
+                        evals.append(self.minimax(temp_board, depth-1, not white))
+        if white:
+            return max(evals)
+        return min(evals)
 
 
 
 
-    def minimax(self):
-        pass

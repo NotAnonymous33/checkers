@@ -70,7 +70,7 @@ class Board:
         self.turn = 1
         self.highlighted_cells = []
         self.buttons = []
-        self.ai = AI()
+        self.ai = AI(DEPTH)
 
     def click(self, xpos, ypos):
         xc = xpos // CLENGTH
@@ -158,15 +158,18 @@ class Board:
             self.check_direction(x, y, -direction, 1)
 
     def check_direction(self, x, y, ydirection, xdirection):
-        try:
-            if self.pieces[y + ydirection][x + xdirection].color.value == -1:
-                self.highlighted_cells.append((x + xdirection, y + ydirection))
-                return
-        except IndexError:
-            pass
+        # If there is empty space
+        if not (0 <= y + ydirection <= 7 and 0 <= x + xdirection <= 7):
+            return
+        if self.pieces[y + ydirection][x + xdirection].color.value == -1:
+            self.highlighted_cells.append((x + xdirection, y + ydirection))
+            return
+        # if jump over piece
         try:
             if self.pieces[y + ydirection][x + xdirection].color.value == int(not self.turn) and \
                     self.pieces[y + 2 * ydirection][x + 2 * xdirection].color.value == -1:
+                if not(0 <= y + 2 * ydirection <= 7 and 0 <= x + 2 * xdirection <= 7):
+                    return
                 self.highlighted_cells.append((x + 2 * xdirection, y + 2 * ydirection))
         except IndexError:
             pass
