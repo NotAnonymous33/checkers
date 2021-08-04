@@ -54,6 +54,7 @@ class Cell:
 
 class Board:
     def __init__(self):
+        self.quit = False
         self.cells = [[Cell(col, row) for col in range(8)] for row in range(8)]
         self.pieces = [
             [Piece(0) if i % 2 else Blank() for i in range(8)],
@@ -174,7 +175,9 @@ class Board:
         except IndexError:
             pass
 
-    def quit(self):
+    def check_quit(self):
+        if self.quit:
+            return True
         white = 0
         black = 0
         for row in self.pieces:
@@ -189,8 +192,12 @@ class Board:
         count = 0
         for row in self.pieces:
             for piece in row:
+                change = 0
                 if piece.color.value == 0:
-                    count -= 1
+                    change = -1
                 elif piece.color.value == 1:
-                    count += 1
+                    change = 1
+                if isinstance(piece, King):
+                    change *= 2
+                count += change
         return count

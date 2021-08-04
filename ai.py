@@ -2,6 +2,7 @@ from copy import copy
 from constants import *
 from blank import Blank
 import functools
+import time
 
 
 class AI:
@@ -61,7 +62,7 @@ class AI:
                             best_dest_coord = move
 
         board.source_coord = best_source_coord
-
+        print(lowest_eval)
         board.move_piece(*best_dest_coord)
         if abs(best_source_coord[0] - best_dest_coord[0]) == 2:
             board.pieces[(best_dest_coord[1] + best_source_coord[1]) // 2][(best_dest_coord[0] + best_source_coord[0]) // 2] = Blank()
@@ -95,6 +96,7 @@ class AI:
                         board.source_coord = (colx, rowy)
                         board.highlight_cells(colx, rowy)
 
+
                         for move in board.highlighted_cells:
                             temp_board = copy(board)
                             temp_board.pieces = [row[:] for row in board.pieces]
@@ -103,6 +105,8 @@ class AI:
                             if abs(move[0] - board.source_coord[0]) == 2:
                                 temp_board.pieces[(move[1] + rowy) // 2][(move[0] + colx) // 2] = Blank()
                             evals.append(temp_board.evaluate())
+            if not len(evals):
+                return 0
             if white:
                 return max(evals)
             return min(evals)
@@ -116,14 +120,18 @@ class AI:
                     board.source_coord = (colx, rowy)
                     board.highlight_cells(colx, rowy)
 
+
                     for move in board.highlighted_cells:
                         temp_board = copy(board)
                         temp_board.pieces = [row[:] for row in board.pieces]
                         temp_board.move_piece(*move)
 
+
                         if abs(move[0] - board.source_coord[0]) == 2:
                             temp_board.pieces[(move[1] + rowy) // 2][(move[0] + colx) // 2] = Blank()
                         evals.append(self.minimax(temp_board, depth-1, not white))
+        if not len(evals):
+            return 0
         if white:
             return max(evals)
         return min(evals)

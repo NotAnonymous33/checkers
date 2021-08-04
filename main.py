@@ -16,7 +16,7 @@ pygame.display.set_caption("Checkers by Anonymous33")
 
 while running:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT or board.quit():
+        if event.type == pygame.QUIT or board.check_quit():
             running = False
 
         if event.type == pygame.MOUSEBUTTONUP:
